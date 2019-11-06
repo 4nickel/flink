@@ -1,0 +1,43 @@
+<header class="Header">
+    <!-- top -->
+    <div class="box outer head">
+        <!-- side -->
+        <div class="box inner side" ng-if="Login.user.auth == true">
+            <img class="field Avatar" src="/img/avatar_02.png"/>
+            <icon-bubble class="field DownloadIcon" icon="fas fa-cloud">{{Index.userInfo.link.down}}</icon-bubble>
+            <span class="field Username">{{Login.user.name}}</span>
+        </div>
+        <div class="box inner side" ng-if="Login.user.auth == false">
+        </div>
+        <!-- center -->
+        <div class="box inner center">
+            <h1 class="field">flink</h1>
+        </div>
+        <!-- side -->
+        <div class="box inner side" ng-if="Login.user.auth == true">
+            <button class="field LogoutBtn" ng-click="logout()">
+                <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+            </button>
+        </div>
+        <div class="box inner side" ng-if="Login.user.auth == false">
+        </div>
+    </div>
+    <!-- mid -->
+    <div class="box outer body">
+        <!-- side -->
+        <div class="box inner side"></div>
+        <!-- center -->
+        <div class="box inner center">
+            <img class="field Logo" src="/img/fox_02.png"/>
+        </div>
+        <!-- side -->
+        <div class="box inner side"></div>
+    </div>
+    <!-- bot -->
+    <div class="box outer tail">
+        <!-- center -->
+        <div class="box inner center">
+            <h2 class="field">·  {{title}}  ·</h2>
+        </div>
+    </div>
+</header>

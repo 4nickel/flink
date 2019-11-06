@@ -1,0 +1,554 @@
+/*
+ * Welcome to Compass.
+ * In this file you should write your main styles. (or centralize your imports)
+ * Import this file using the following HTML or equivalent:
+ * <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css" />
+ */
+
+@import "base";
+
+//{{{ Elements
+
+button {
+    @include border-radius(0px);
+    border: 0;
+}
+
+button:focus {
+    outline: none;
+}
+
+hr {
+    height: 1px;
+    background: $slate-color;
+}
+
+input[type=text] {
+    outline: none;
+    border: 0px solid;
+}
+input[type=password] {
+    outline: none;
+    border: 0px solid;
+}
+
+//}}}
+//{{{ Widgets
+//{{{ IconBubble
+
+.IconBubble {
+    @include vcenter-items();
+    @include hcenter-items();
+    font-size: $bubble-icon-size;
+    z-index: 1;
+
+    & .inner {
+        position: absolute;
+        @include vcenter-items();
+        @include hcenter-items();
+        z-index: 2;
+        font-size: $bubble-text-size;
+        font-family: $cursive-font;
+        color: $text-invert-color;
+    }
+}
+
+//}}}
+//}}}
+//{{{ Structure
+//{{{ Page
+
+.page {
+    @include rows();
+    background: $bg-color;
+    min-height: 100vh;
+}
+
+//}}}
+//{{{ Header
+
+.Header {
+    @include vbar();
+    height: $header-height;
+    width: 100%;
+    justify-content: flex-start;
+
+    & .box {
+
+        &.outer {
+            @include hbar();
+            width: 100%;
+            &.head {
+                height: $header-top-height;
+                background: $header-top-color;
+            }
+            &.body {
+                height: $header-mid-height;
+                background: $header-mid-color;
+            }
+            &.tail {
+                height: $header-bot-height;
+                background: $header-bot-color;
+            }
+        }
+
+        &.inner {
+            @include hbar();
+            height: 100%;
+
+            &.side {
+                width: 30%;
+            }
+            &.center {
+                width: 100%;
+            }
+        }
+
+        & .field {
+            @include hcenter-items();
+            @include vcenter-items();
+
+            &.Avatar {
+                @include round();
+                height: $header-avatar-size;
+                width: $header-avatar-size;
+                margin-left: 4.0rem;
+                background: $backdrop-color;
+                border: 6px solid $bg-color;
+            }
+
+            &.DownloadIcon {
+                position: relative;
+                left: -1.5rem;
+                top: -1.4rem;
+                color: $select-color;
+            }
+
+            &.LogoutBtn {
+                @include hcenter-items();
+                @include vcenter-items();
+                @include border-radius(0.3rem);
+                height: $header-button-height;
+                width: $header-button-width;
+                color: $header-button-icon-color;
+                background: $reject-color;
+                padding-left: 0.8rem;
+                border: 2px solid $header-button-border-color;
+            }
+
+            &.Logo {
+                @include round();
+                width: $header-logo-size;
+                height: $header-logo-size;
+                background: $backdrop-color;
+                position: relative;
+                border: 20px solid $backdrop-color;
+            }
+
+            &.Username {
+                font-family: $cursive-font;
+                color: white;
+                position: relative;
+                left: -2.9rem;
+                top: +2.2rem;
+            }
+        }
+
+        & h2.field {
+            font-family: $cursive-font;
+            color: $text-color;
+            position: relative;
+            font-size: 25;
+        }
+
+        & h1.field {
+            font-family: $cursive-font;
+            color: $text-invert-color;
+            position: relative;
+            font-size: 60;
+        }
+    }
+}
+
+//}}}
+//{{{ Main
+
+main {
+    @include rows();
+    flex: 1;
+    //@include display-flex();
+    //min-height: 100vh;
+    //flex: 1;
+}
+
+//}}}
+//{{{ Footer
+
+.Footer {
+    @include hbar();
+    height: $footer-height;
+    background: $footer-color;
+    border-top: 2px solid $backdrop-color;
+    color: $text-invert-color;
+    margin-top: 5.0rem;
+
+    & .box {
+        @include vbar();
+
+        & .field {
+            @include vcenter-items();
+            @include hcenter-items();
+            font-family: $cursive-font;
+            width: 100%;
+            height: 100%;
+        }
+
+        & h1.field {
+            font-size: 30;
+        }
+
+        & h2.field {
+            position: relative;
+            bottom: 0.2rem;
+            font-size: 10;
+        }
+    }
+}
+
+//}}}
+//}}}
+//{{{ Site
+//{{{ Index
+//{{{ Browser
+
+.Browser {
+
+    @include vbar();
+    @include centered();
+    width: $browser-width;
+    border: $panel-border;
+
+    & .box {
+        @include hbar();
+        width: 100%;
+
+        &.body {
+            background: $bg-color;
+        }
+
+        &.animated {
+            overflow: hidden;
+            transition: $slide-fast;
+            height: $item-height;
+        }
+
+        &.ng-hide {
+            height: 0px;
+        }
+
+        & .gradient-a { height: $item-height; width: 20%; background: darken($bg-color, $contrast-3); }
+        & .gradient-b { height: $item-height; width: 10%; background: darken($bg-color, $contrast-2); }
+        & .gradient-c { height: $item-height; width:  5%; background: darken($bg-color, $contrast-1); }
+
+        & .field {
+            height: $item-height;
+            width: 100%;
+        }
+
+        & input.field {
+            background: $bg-color;
+            color: $text-color;
+            font-family: $monospace-font;
+            font-size: 15;
+            font-weight: bold;
+            text-align: center;
+            &:hover {
+                transition: $slide-fast;
+                background: darken($bg-color, $contrast-1);
+                color: $text-hilite-color;
+            }
+        }
+
+        & .field i {
+            background: transparent;
+            font-size: 35;
+        }
+
+        & button.field {
+            @include hcenter-items();
+            @include vcenter-items();
+            &.BrowseBtn {
+                color: darken($select-color, $contrast-3);
+                background: $select-color;
+                &:hover {
+                    transition: $slide-fast;
+                    color: darken($select-color, $contrast-1);
+                    background: lighten($select-color, $contrast-1);
+                }
+            }
+            &.AcceptBtn {
+                color: darken($affirm-color, $contrast-3);
+                background: $affirm-color;
+                &:hover {
+                    transition: $slide-fast;
+                    color: darken($affirm-color, $contrast-1);
+                    background: lighten($affirm-color, $contrast-1);
+                }
+            }
+            &.CancelBtn {
+                color: darken($reject-color, $contrast-3);
+                background: $reject-color;
+                &:hover {
+                    transition: $slide-fast;
+                    color: darken($reject-color, $contrast-1);
+                    background: $reject-color;
+                    background: lighten($reject-color, $contrast-1);
+                }
+            }
+        }
+    }
+}
+
+//}}}
+//{{{ History
+
+.History {
+
+    @include centered();
+    @include vbar();
+    width: 50%;
+    border: $panel-border;
+    margin-top: 0.5rem;
+
+    font-size: 14;
+    font-family: $monospace-font;
+
+    transition: $slide-fast;
+
+    &.ng-hide {
+        height: 0px;
+    }
+
+    & .box {
+
+        @include centered();
+        @include vbar();
+        width: 100%;
+
+        &.head {
+            height: $info-height;
+            background: $slate-color;
+            color: $text-invert-color;
+        }
+
+        &.body {
+            background: $bg-color;
+        }
+
+        &.animated {
+            overflow: hidden;
+            transition: $slide-fast;
+            height: $info-height;
+        }
+
+        &.ng-hide {
+            height: 0px;
+        }
+
+        & .field {
+            @include vcenter-items();
+            @include hcenter-items();
+            height: $info-height;
+
+            &.top {
+                position: relative;
+                top: 0.35rem;
+            }
+            &.bot {
+                position: relative;
+                bottom: 0.35rem;
+            }
+            &.hilite {
+                color: $affirm-color;
+            }
+            &.lolite {
+                color: white;
+            }
+        }
+    }
+}
+
+//}}}
+//{{{ FileList
+
+.FileList {
+    @include centered();
+    @include rows();
+    width: $file-list-width;
+    border: $panel-border;
+    margin-top: 0.5rem;
+
+    & .animated {
+
+        overflow: hidden;
+
+        &.ng-enter {
+            transition: $slide-slow;
+            height: 0px;
+        }
+
+        &.ng-enter.ng-enter-active {
+            height: $item-height;
+        }
+
+        &.ng-leave {
+            transition: $slide-slow;
+            height: $item-height;
+        }
+
+        &.ng-leave.ng-leave-active {
+            height: 0px;
+        }
+    }
+}
+
+
+.File {
+    @include columns();
+    width: 100%;
+    color: $text-color;
+    font-family: $monospace-font;
+    font-size: 15;
+    height: $item-height;
+
+    & .field {
+        @include vcenter-items();
+        text-decoration: none;
+        padding-left: 10px;
+        padding-right: 10px;
+
+        &.LockBtn {
+            background: $slate-color;
+            color: $text-invert-color;
+            &:hover {
+                transition: $slide-fast;
+                color: $affirm-color;
+            }
+        }
+        &.Key {
+            background: darken($bg-color, $contrast-1);
+        }
+        &.Val {
+            background: $bg-color;
+            width: 100%;
+            font-weight: bold;
+            &:hover {
+                background: darken($bg-color, $contrast-1);
+                transition: $slide-fast;
+                color: $text-hilite-color;
+            }
+        }
+        &.Downloads {
+            background: darken($bg-color, $contrast-1);
+            width: 10%;
+            justify-content: flex-end;
+        }
+        &.Size {
+            background: darken($bg-color, $contrast-1);
+            width: 15%;
+            justify-content: flex-end;
+        }
+        &.DownloadBtn {
+            background: $slate-color;
+            color: $text-invert-color;
+            &:hover {
+                transition: $slide-fast;
+                color: $select-color;
+            }
+        }
+        &.DeleteBtn {
+            background: $slate-color;
+            color: $text-invert-color;
+            &:hover {
+                transition: $slide-fast;
+                color: $reject-color;
+            }
+        }
+    }
+}
+
+//}}}
+//}}}
+//{{{ Authentication
+//{{{ Login
+
+.Login {
+    @include centered();
+    @include rows();
+    width: 15%;
+    border: 30px solid $backdrop-color;
+    color: $text-invert-color;
+
+    & .box {
+
+        height: $info-height;
+        width: 100%;
+
+        &.border {
+            border-bottom: 1px solid $slate-color;
+        }
+
+        &.animated {
+            overflow: hidden;
+            transition: $slide-fast;
+        }
+
+        &.ng-hide {
+            height: 0px;
+        }
+
+        & .field {
+            width: 100%;
+            height: 100%;
+
+            &.head {
+                @include vcenter-items();
+                @include hcenter-items();
+                background: $slate-color;
+                color: $text-invert-color;
+            }
+        }
+
+        & input[type="password"].field {
+            font-family: $monospace-font;
+            font-size: 9px;
+            font-weight: normal;
+            text-align: center;
+        }
+
+        & input[type="text"].field {
+            font-family: $monospace-font;
+            font-size: 15px;
+            font-weight: normal;
+            text-align: center;
+        }
+
+        & button.field {
+            @include hcenter-items();
+            @include vcenter-items();
+            color: $text-invert-color;
+
+            &.AcceptBtn {
+                background: $affirm-color;
+                &:hover {
+                    transition: $slide-fast;
+                    background: lighten($affirm-color, $contrast-2);
+                }
+            }
+        }
+    }
+}
+
+//}}}
+//}}}
+//}}}

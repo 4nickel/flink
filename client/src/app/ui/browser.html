@@ -1,0 +1,29 @@
+<div class="Browser">
+    <div class="box body">
+        <!-- browse button -->
+        <input class="hidden" type="file" onchange="onChange(this)" id="BrowserFile"></input>
+        <button class="field BrowseBtn" onclick="document.querySelector('#BrowserFile').click()">
+            <i class="fa fa-folder-open"></i>
+        </button>
+    </div>
+    <div class="box body animated ng-hide" ng-show="data.show">
+        <!-- file name -->
+        <div class="gradient-a"></div>
+        <div class="gradient-b"></div>
+        <div class="gradient-c"></div>
+        <input class="field" type="text" ng-model="data.name" id="BrowserName"></input>
+        <div class="gradient-c"></div>
+        <div class="gradient-b"></div>
+        <div class="gradient-a"></div>
+    </div>
+    <div class="box body animated ng-hide" ng-show="data.show">
+        <!-- cancel button -->
+        <button class="field CancelBtn" ng-click="data.cancelUpload()">
+            <i class="fas fa-times"></i>
+        </button>
+        <!-- affirm button -->
+        <button class="field AcceptBtn" ng-click="data.acceptUpload()">
+            <i class="fas fa-cloud-upload-alt"></i>
+        </button>
+    </div>
+</div>

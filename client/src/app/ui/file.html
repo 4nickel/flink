@@ -1,0 +1,9 @@
+<div class="File">
+    <div class="field LockBtn"><i class="fas fa-key"></i></div>
+    <div class="field Key">{{data.api.key}}</div>
+    <div class="field Val">{{data.api.val}}</div>
+    <div class="field Downloads">{{data.api.downloads}}</div>
+    <div class="field Size">{{data.size[0] | number:1 }} {{data.size[1]}}</div>
+    <a class="field DownloadBtn" ng-href="{{data.relLink()}}"><i class="fas fa-cloud-download-alt"></i></a>
+    <button class="field DeleteBtn" ng-click="data.delete()"><i class="fas fa-minus-circle"></i></button>
+</div>

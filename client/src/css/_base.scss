@@ -1,0 +1,148 @@
+@import "compass/reset";
+@import "compass/utilities";
+@import "compass/css3";
+
+//{{{ Mixins
+
+@mixin rows() {
+    @include display-flex;
+    @include flex-direction(column);
+}
+
+@mixin columns() {
+    @include display-flex;
+    @include flex-direction(row);
+}
+
+@mixin centered() {
+    margin: auto;
+}
+
+@mixin vcenter-items() {
+    @include display-flex;
+    align-items: center;
+}
+
+@mixin hcenter-items() {
+    @include display-flex;
+    justify-content: center;
+}
+
+@mixin round() {
+    @include border-radius(50%);
+}
+
+@mixin hbar() {
+    @include columns();
+    @include vcenter-items();
+    @include hcenter-items();
+}
+
+@mixin vbar() {
+    @include rows();
+    @include vcenter-items();
+    @include hcenter-items();
+}
+
+@mixin slide-height($slide-height) {
+    transition: all linear 0.25s;
+    height: $slide-height;
+}
+
+@mixin slide-width($slide-width) {
+    transition: all linear 0.25s;
+    width: $slide-width;
+}
+
+
+//}}}
+//{{{ Variables
+
+$contrast-1:                5%;
+$contrast-2:                10%;
+$contrast-3:                15%;
+$slide-fast:                linear 0.3s;
+$slide-slow:                linear 0.6s;
+
+$panel-border:              5px solid white;
+
+//{{{ Fonts
+
+$monospace-font: 'Cousine';
+$cursive-font: 'Unica One';
+
+//}}}
+//{{{ Colors
+//{{{ Palette
+
+$backdrop-color:            white;
+$slate-color:               #313541;
+$bg-color:                  #f1f1f1;
+$fg-color:                  #ffffff;
+$affirm-color:              #4caf50;
+$reject-color:              #d8251c;
+$select-color:              #379dbf;
+$warning-color:             #cfd81c;
+
+$text-color:                $slate-color;
+$text-invert-color:         white;
+$text-hilite-color:         #e75b00;
+
+//}}}
+//{{{ Header
+
+$header-top-color:              $slate-color;
+$header-mid-color:              $backdrop-color;
+$header-bot-color:              $bg-color;
+$header-button-border-color:    $backdrop-color;
+$header-button-icon-color:      $header-button-border-color;
+
+//}}}
+//{{{ Footer
+
+$footer-color:              $slate-color;
+
+//}}}
+//}}}
+//{{{ Dimensions
+//{{{ Bubble
+
+$bubble-icon-size: 35px;
+$bubble-text-size: 13px;
+
+//}}}
+//{{{ Header
+
+$header-height:            23.0rem;
+$header-top-height:         8.0rem;
+$header-mid-height:        10.0rem;
+$header-bot-height:         5.0rem;
+$header-button-width:       4.0rem;
+$header-button-height:      2.0rem;
+$header-avatar-size:        5.5rem;
+$header-logo-size:         10.0rem;
+
+//}}}
+//{{{ Footer
+
+$footer-height:             6.0rem;
+
+//}}}
+
+$item-height:               3.0rem;
+$info-height:               1.5rem;
+
+$browser-width:             80%;
+$file-list-width:           $browser-width;
+
+//}}}
+//}}}
+//{{{ Classes
+
+.hidden { display: none; }
+
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+    display: none !important;
+}
+
+//}}}

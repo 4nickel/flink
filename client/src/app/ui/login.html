@@ -1,0 +1,14 @@
+<div class="Login">
+    <div class="box">
+        <div class="field head"><i class="fas fa-lock"></i></div>
+    </div>
+    <div class="box border">
+        <input class="field" type="text" ng-model="data.username" ng-change="data.onChange()"></input>
+    </div>
+    <div class="box animated ng-hide" ng-show="data.expand">
+        <input class="field" type="password" ng-model="data.password" ng-change="data.onChange()"></input>
+    </div>
+    <div class="box animated ng-hide" ng-show="data.expand">
+        <button class="field AcceptBtn" ng-click="data.acceptLogin()"><i class="fas fa-key"></i></button>
+    </div>
+</div>

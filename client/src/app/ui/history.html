@@ -1,0 +1,13 @@
+<div class="History ng-hide" ng-show="data.show">
+    <div class="box head" ng-if="data.expand == false" ng-click="data.toggleExpand()">
+        <i class="field top hilite fas fa-sort-up"></i>
+        <i class="field bot lolite fas fa-sort-down"></i>
+    </div>
+    <div class="box head" ng-if="data.expand == true" ng-click="data.toggleExpand()">
+        <i class="field top lolite fas fa-sort-up"></i>
+        <i class="field bot hilite fas fa-sort-down"></i>
+    </div>
+    <div class="box body animated ng-hide" ng-show="data.expand">
+        <div class="field" ng-repeat="file in data.fileList">{{file.absLink()}}</div>
+    </div>
+</div>

@@ -1,0 +1,7 @@
+**/*.rs.bk
+/bin
+/assets/*
+!/assets/.gitkeep
+/server/target
+/server/var
+/client/.sass-cache
