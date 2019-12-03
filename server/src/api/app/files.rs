@@ -1,4 +1,4 @@
-use crate::db;
+use crate::db::{self, schema::*};
 use crate::model::{User, File, FileInsert};
 use crate::util::{error::{Error as E, Res}, random::random_ascii, upload::FileUpload, download::FileDownload};
 
@@ -151,7 +151,7 @@ pub fn delete(u: User, key: String, c: db::Connection) -> Res<JsonValue>
 #[get("/")]
 pub fn query(u: User, c: db::Connection) -> Res<JsonValue>
 {
-    let files = File::table().filter(File::with_user(u.id)).get_results::<File>(&*c)?;
+    let files = files::table.filter(files::id.eq(u.id)).get_results::<File>(&*c)?;
     Ok(JsonValue(serde_json::to_value(&files)?))
 }
 
