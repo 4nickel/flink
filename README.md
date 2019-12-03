@@ -12,9 +12,19 @@ In order to build the project, you need to install make, rsync, cargo, a recent 
 $ git clone https://github.com/4nickel/flink
 $ cd flink
 $ make
-$ make launch
+$ make service
 ```
-Once the server is running, navigate to ```http://localhost:8000```.
+Once the service is running, navigate to ```http://localhost:8000```.
+
+##### User Management
+You have to add users manually using a command-line interface - flink doesn't provide an admin interface. You can find the ```flink``` binary in ```server/target/release```.
+```sh
+$ flink user add $username $password
+$ flink user del $username
+```
+
+##### Security
+Rocket doesn't support SSL yet, so you'll have to run this upstream of an appropriate reverse-proxy server like nginx or apache. If you don't know what that means please make sure you do before running this service in the wild.
 
 ##### Powered by..
 *  [Rocket] - A simple, fast and secure framework for writing web-services in Rust
