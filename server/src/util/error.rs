@@ -2,7 +2,7 @@ use std;
 use diesel;
 use base64;
 
-pub type ApiResult<T> = Result<T, Error>;
+pub type Res<T> = Result<T, Error>;
 
 #[derive(Debug, Fail)]
 pub enum ServerError {

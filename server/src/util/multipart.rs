@@ -1,10 +1,12 @@
-use crate::util::{error::{Error as ApiError, ApiResult}};
+use crate::util::{error::{Error as E, Res}};
 
 use rocket::{Request, Data, Outcome, http::ContentType, data::{self, FromDataSimple}};
 use std::path::{Path, PathBuf};
 use multipart::server::Multipart;
 use multipart::server::save::{Entries, SavedData};
 use multipart::server::save::SaveResult::*;
+
+pub const SIZE_LIMIT: u64 = 5368709120;
 
 pub struct MultipartForm {
     pub entries: Entries,
@@ -31,8 +33,7 @@ pub enum MultipartError {
 
 impl MultipartForm {
 
-    pub fn read_boundary<'a>(request: &'a Request) -> ApiResult<&'a str>
-    {
+    pub fn read_boundary<'a>(request: &'a Request) -> Res<&'a str> {
         let content_type = match request.guard::<&ContentType>() {
             Outcome::Success(value) => value,
             _ => {
@@ -50,10 +51,10 @@ impl MultipartForm {
         }
     }
 
-    pub fn from_bounded_data(data: Data, boundary: &str, path: &Path) -> ApiResult<Self>
-    {
-        match Multipart::with_body(data.open(), boundary).save()
-                .size_limit(5368709120)
+    pub fn from_bounded_data(data: Data, boundary: &str, path: &Path) -> Res<Self> {
+        match Multipart::with_body(data.open(), boundary)
+                .save()
+                .size_limit(SIZE_LIMIT)
                 .with_dir(path) {
             Full(entries) => {
                 println!("[multipart] read full form");
@@ -90,13 +91,11 @@ impl MultipartForm {
         }
     }
 
-    pub fn from_request(request: &Request, data: Data, path: &Path) -> ApiResult<Self>
-    {
+    pub fn from_request(request: &Request, data: Data, path: &Path) -> Res<Self> {
         Ok(Self::from_bounded_data(data, Self::read_boundary(request)?, path)?)
     }
 
-    pub fn get_opt<'a>(&'a self, key: &str) -> Option<&'a SavedData>
-    {
+    pub fn get_opt<'a>(&'a self, key: &str) -> Option<&'a SavedData> {
         if let Some(field) = self.entries.fields.get(key) {
             if let Some(value) = field.get(0) {
                 return Some(&value.data)
@@ -105,8 +104,7 @@ impl MultipartForm {
         return None
     }
 
-    pub fn get<'a>(&'a self, key: &str) -> Result<&'a SavedData, MultipartError>
-    {
+    pub fn get<'a>(&'a self, key: &str) -> Result<&'a SavedData, MultipartError> {
         if let Some(field) = self.entries.fields.get(key) {
             if let Some(value) = field.get(0) {
                 return Ok(&value.data)
@@ -115,15 +113,13 @@ impl MultipartForm {
         return Err(MultipartError::KeyError { key: key.into() })
     }
 
-    pub fn get_text<'a>(&'a self, key: &str) -> Result<String, MultipartError>
-    {
+    pub fn get_text<'a>(&'a self, key: &str) -> Result<String, MultipartError> {
         match self.get(key)? {
             SavedData::Text(val) => Ok(val.clone()),
             _ => Err(MultipartError::ValueError { key: key.into(), val: String::from("Text") })
         }
     }
-    pub fn get_file<'a>(&'a self, key: &str) -> Result<(PathBuf, usize), MultipartError>
-    {
+    pub fn get_file<'a>(&'a self, key: &str) -> Result<(PathBuf, usize), MultipartError> {
         match self.get(key)? {
             SavedData::File(val, len) => Ok((val.clone(), *len as usize)),
             _ => Err(MultipartError::ValueError { key: key.into(), val: String::from("File") })
@@ -132,7 +128,7 @@ impl MultipartForm {
 }
 
 impl FromDataSimple for MultipartForm {
-    type Error = ApiError;
+    type Error = E;
     fn from_data(request: &Request, data: Data) -> data::Outcome<Self, Self::Error> {
         use crate::util::error::failure;
         match MultipartForm::from_request(request, data, Path::new("/tmp/multipart")) {

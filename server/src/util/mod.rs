@@ -4,4 +4,5 @@ pub mod error;
 pub mod multipart;
 pub mod random;
 pub mod sql;
+pub mod arg;
 pub mod upload;

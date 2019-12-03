@@ -1,6 +1,6 @@
 use crate::db;
 use crate::model::{Session, User};
-use crate::util::error::ApiResult;
+use crate::util::error::Res;
 
 use rocket::{request::Form, http::{Cookies, Status}, response::status};
 use rocket_contrib::json::{Json, JsonValue};
@@ -13,8 +13,7 @@ pub struct Login {
     pub password: String,
 }
 
-pub fn login(login: Login, c: db::Connection, mut cookies: Cookies) -> ApiResult<JsonValue>
-{
+pub fn login(login: Login, c: db::Connection, mut cookies: Cookies) -> Res<JsonValue> {
     let session = User::login(
         &login.username,
         &login.password,
@@ -25,19 +24,20 @@ pub fn login(login: Login, c: db::Connection, mut cookies: Cookies) -> ApiResult
 }
 
 #[post("/", data = "<data>", format = "application/json")]
-pub fn login_json(data: Json<Login>, c: db::Connection, cookies: Cookies) -> ApiResult<JsonValue>
-{ login(data.into_inner(), c, cookies) }
+pub fn login_json(data: Json<Login>, c: db::Connection, cookies: Cookies) -> Res<JsonValue> {
+    login(data.into_inner(), c, cookies)
+}
 
 #[post("/", data = "<data>", format = "application/x-www-form-urlencoded")]
-pub fn login_http(data: Form<Login>, c: db::Connection, cookies: Cookies) -> ApiResult<JsonValue>
-{ login(data.into_inner(), c, cookies) }
+pub fn login_http(data: Form<Login>, c: db::Connection, cookies: Cookies) -> Res<JsonValue> {
+    login(data.into_inner(), c, cookies)
+}
 
 // }}}
 // {{{ Logout
 
 #[delete("/")]
-pub fn logout(c: db::Connection, mut cookies: Cookies) -> ApiResult<JsonValue>
-{
+pub fn logout(c: db::Connection, mut cookies: Cookies) -> Res<JsonValue> {
     match Session::logout(&c, &mut cookies) {
         Ok(_) => Ok(json!({})),
         Err(error) => Err(error)
@@ -54,7 +54,7 @@ pub struct Register {
     pub password_two: String,
 }
 
-pub fn register(register: Register, c: db::Connection, mut cookies: Cookies) -> ApiResult<status::Created<JsonValue>>
+pub fn register(register: Register, c: db::Connection, mut cookies: Cookies) -> Res<status::Created<JsonValue>>
 {
     match User::register(
         &register.username,
@@ -69,24 +69,26 @@ pub fn register(register: Register, c: db::Connection, mut cookies: Cookies) -> 
 }
 
 #[post("/", data = "<data>", format = "application/json")]
-pub fn register_json(data: Json<Register>, c: db::Connection, cookies: Cookies) -> ApiResult<status::Created<JsonValue>>
-{ register(data.into_inner(), c, cookies) }
+pub fn register_json(data: Json<Register>, c: db::Connection, cookies: Cookies) -> Res<status::Created<JsonValue>> {
+    register(data.into_inner(), c, cookies)
+}
 
 #[post("/", data = "<data>", format = "application/x-www-form-urlencoded")]
-pub fn register_http(data: Form<Register>, c: db::Connection, cookies: Cookies) -> ApiResult<status::Created<JsonValue>>
-{ register(data.into_inner(), c, cookies) }
+pub fn register_http(data: Form<Register>, c: db::Connection, cookies: Cookies) -> Res<status::Created<JsonValue>> {
+    register(data.into_inner(), c, cookies)
+}
 
 // }}}
 // {{{ Query
 
 #[get("/")]
-pub fn query(u: User) -> ApiResult<JsonValue>
-{
+pub fn query(u: User) -> Res<JsonValue> {
     Ok(json!({"name": u.name}))
 }
 
 #[get("/", rank = 3)]
-pub fn query_forbidden() -> Status
-{ Status::Forbidden }
+pub fn query_forbidden() -> Status {
+    Status::Forbidden
+}
 
 // }}}

@@ -1,8 +1,7 @@
-use crate::util::{self, error::{Error as ApiError, ApiResult}};
+use crate::util::{self, error::{Error as E, Res}};
 use crate::db::{self, schema::*};
 use crate::model::{Password, Session};
-//use std::ops::Deref;
-use diesel::{self, SaveChangesDsl, prelude::*, dsl::*, result::QueryResult};
+use diesel::{self, SaveChangesDsl, prelude::*, result::QueryResult};
 use rocket::{Outcome, http::{Cookies}, request::{self, Request, FromRequest}};
 use rocket::http::Status;
 
@@ -46,75 +45,43 @@ pub enum AuthenticationError {
     },
 }
 
-type AllColumns = (
-    users::id,
-    users::name,
-);
-
-const ALL_COLUMNS : AllColumns = (
-    users::id,
-    users::name,
-);
-
-type All = Select<users::table, AllColumns>;
-type WithId = Eq<users::id, i32>;
-type WithIds<'a> = EqAny<users::id, &'a Vec<i32>>;
-type WithName<'a> = Eq<users::name, &'a str>;
-type WithNames<'a> = EqAny<users::name, &'a Vec<&'a str>>;
-
 impl User {
 
-    pub fn insert_one(values: &UserInsert, c: &db::Connection) -> ApiResult<Self>
-    {
-        diesel::insert_into(Self::table())
+    pub fn insert_one(values: &UserInsert, c: &db::Connection) -> Res<Self> {
+        diesel::insert_into(users::table)
             .values(values)
             .execute(&**c)?;
 
-        Ok(Self::table().filter(
+        Ok(users::table.filter(
             util::sql::with_rowid(util::sql::last_insert_rowid(c))).first(&**c)?
         )
     }
 
-    pub fn table() -> users::table
-    { users::table }
-
-    pub fn all() -> All
-    { Self::table().select(ALL_COLUMNS) }
-
-    pub fn collection_url() -> String
-    {
+    pub fn collection_url() -> String {
         use crate::api;
         api::collection_url(api::RES_USER)
     }
 
-    pub fn url(&self) -> String
-    {
+    pub fn url(&self) -> String {
         use crate::api;
         api::resource_url(api::RES_USER, self.id)
     }
 
-    pub fn with_id(id: i32) -> WithId
-    { users::id.eq(id) }
-
-    pub fn with_ids(ids: &Vec<i32>) -> WithIds
-    { users::id.eq_any(ids) }
-
-    pub fn with_name(name: &str) -> WithName
-    { users::name.eq(name) }
-
-    pub fn with_names<'a>(names: &'a Vec<&'a str>) -> WithNames
-    { users::name.eq_any(names) }
-
-    pub fn by_id(id: i32, c: &db::Connection) -> ApiResult<Self>
-    {
-        let user = Self::table()
-            .filter(Self::with_id(id))
+    pub fn by_id(id: i32, c: &db::Connection) -> Res<Self> {
+        let user = users::table
+            .filter(users::id.eq(id))
             .first(&**c)?;
         Ok(user)
     }
 
-    pub fn from_cookie(cookies: &mut Cookies, c: &db::Connection) -> ApiResult<Option<Self>>
-    {
+    pub fn by_name(name: &str, c: &db::Connection) -> Res<Self> {
+        let user = users::table
+            .filter(users::name.eq(name))
+            .first(&**c)?;
+        Ok(user)
+    }
+
+    pub fn from_cookie(cookies: &mut Cookies, c: &db::Connection) -> Res<Option<Self>> {
         match Session::from_cookie(cookies, c) {
             Ok(result) => {
                 match result {
@@ -137,9 +104,8 @@ impl User {
         }
     }
 
-    pub fn create(values: &UserInsert, password: &str, c: &db::Connection) -> ApiResult<(User, Password)>
-    {
-        c.transaction::<_, ApiError, _>(|| {
+    pub fn create(values: &UserInsert, password: &str, c: &db::Connection) -> Res<(User, Password)> {
+        c.transaction::<_, E, _>(|| {
             // Check for duplicate names.
             if Self::is_duplicate(&values.name, c)? {
                 println!("[user {}]: duplicate username", values.name);
@@ -158,25 +124,27 @@ impl User {
         })
     }
 
-    pub fn delete(id: i32, c: &db::Connection) -> ApiResult<usize>
-    {
-        Ok(diesel::delete(Self::table().filter(Self::with_id(id))).execute(&**c)?)
+    pub fn delete(id: i32, c: &db::Connection) -> Res<()> {
+        c.transaction::<_, E, _>(|| {
+            diesel::delete(passwords::table.filter(passwords::user_id.eq(id))).execute(&**c)?;
+            diesel::delete(users::table.filter(users::id.eq(id))).execute(&**c)?;
+            Ok(())
+        })
     }
 
-    pub fn update(user: &User, c: &db::Connection) -> ApiResult<()>
-    {
+    pub fn update(user: &User, c: &db::Connection) -> Res<()> {
         user.save_changes::<User>(&**c)?;
         Ok(())
     }
 
-    pub fn is_duplicate(name: &str, c: &db::Connection) -> QueryResult<bool>
-    {
-        let count = Self::table().select(diesel::dsl::count(Self::with_name(name))).execute(&**c)?;
+    pub fn is_duplicate(name: &str, c: &db::Connection) -> QueryResult<bool> {
+        let count = users::table.select(
+            diesel::dsl::count(users::name.eq(name))
+        ).execute(&**c)?;
         Ok(count > 1)
     }
 
-    pub fn register(name: &str, password_one: &str, password_two: &str, c: &db::Connection, cookies: &mut Cookies) -> ApiResult<(User, Password, Session)>
-    {
+    pub fn register(name: &str, password_one: &str, password_two: &str, c: &db::Connection, cookies: &mut Cookies) -> Res<(User, Password, Session)> {
         if password_one != password_two {
             println!("[register {}]: password mismatch", name);
             return Err(RegistrationError::PasswordMismatch {
@@ -184,7 +152,7 @@ impl User {
                 password_two: password_two.into()
             }.into())
         }
-        c.transaction::<_, ApiError, _>(|| {
+        c.transaction::<_, E, _>(|| {
             println!("[register {}]: creating user", name);
             let (user, pass) = Self::create(&UserInsert { name: name.to_string() }, password_one, c)?;
             println!("[register {}]: creating session", name);
@@ -193,22 +161,23 @@ impl User {
         })
     }
 
-    pub fn login(username: &str, password: &str, c: &db::Connection, cookies: &mut Cookies) -> ApiResult<Session>
+    pub fn login(username: &str, password: &str, c: &db::Connection, cookies: &mut Cookies) -> Res<Session>
     {
         use diesel::result::Error::NotFound;
         type Login = (i32, Vec<u8>, String);
 
-        c.transaction::<_, ApiError, _>(|| {
+        c.transaction::<_, E, _>(|| {
 
-            let login = Password::table()
-                    .inner_join(User::table())
-                    .filter(
-                        User::with_name(username)
-                    ).select((
-                        users::id,
-                        passwords::hash,
-                        passwords::salt
-                    )).first::<Login>(&**c);
+            let login = passwords::table
+                .inner_join(users::table)
+                .filter(
+                    users::name.eq(username)
+                ).select((
+                    users::id,
+                    passwords::hash,
+                    passwords::salt
+                ))
+                .first::<Login>(&**c);
 
             match login {
                 Ok((user, hash, salt)) => {
@@ -247,7 +216,7 @@ impl User {
 // {{{ User
 
 impl<'a, 'r> FromRequest<'a, 'r> for User {
-    type Error = ApiError;
+    type Error = E;
 
     fn from_request(request: &'a Request<'r>) -> request::Outcome<Self, Self::Error>
     {

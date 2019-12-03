@@ -1,4 +1,4 @@
-use crate::util::{self, error::ApiResult};
+use crate::util::{self, error::Res};
 use crate::db::{self, schema::*};
 use crate::model::{User};
 use diesel::{self, SaveChangesDsl, prelude::*, dsl::*};
@@ -64,10 +64,10 @@ type WithVals<'a> = EqAny<files::val, &'a Vec<&'a str>>;
 
 impl File {
 
-    pub fn by_id(id: i32, c: &db::Connection) -> ApiResult<Self>
+    pub fn by_id(id: i32, c: &db::Connection) -> Res<Self>
     { Ok(Self::table().filter(Self::with_id(id)).first(&**c)?) }
 
-    pub fn by_key(key: &str, c: &db::Connection) -> ApiResult<Self>
+    pub fn by_key(key: &str, c: &db::Connection) -> Res<Self>
     { Ok(Self::table().filter(Self::with_key(key)).first(&**c)?) }
 
     pub fn table() -> files::table
@@ -100,7 +100,7 @@ impl File {
     pub fn with_vals<'a>(vals: &'a Vec<&'a str>) -> WithVals
     { files::val.eq_any(vals) }
 
-    pub fn insert_one(values: &FileInsert, c: &db::Connection) -> ApiResult<Self>
+    pub fn insert_one(values: &FileInsert, c: &db::Connection) -> Res<Self>
     {
         diesel::insert_into(Self::table())
             .values(values)
@@ -111,23 +111,23 @@ impl File {
         )
     }
 
-    pub fn create(values: &FileInsert, c: &db::Connection) -> ApiResult<File>
+    pub fn create(values: &FileInsert, c: &db::Connection) -> Res<File>
     {
         Self::insert_one(values, c)
     }
 
-    pub fn delete(id: i32, c: &db::Connection) -> ApiResult<usize>
+    pub fn delete(id: i32, c: &db::Connection) -> Res<usize>
     {
         Ok(diesel::delete(Self::table().filter(Self::with_id(id))).execute(&**c)?)
     }
 
-    pub fn update(&self, c: &db::Connection) -> ApiResult<()>
+    pub fn update(&self, c: &db::Connection) -> Res<()>
     {
         self.save_changes::<File>(&**c)?;
         Ok(())
     }
 
-    pub fn is_duplicate(key: &str, c: &db::Connection) -> ApiResult<bool>
+    pub fn is_duplicate(key: &str, c: &db::Connection) -> Res<bool>
     {
         let count = Self::table().select(diesel::dsl::count(Self::with_key(key))).execute(&**c)?;
         return Ok(count > 1);

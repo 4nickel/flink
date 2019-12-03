@@ -1,7 +1,7 @@
-use crate::util::{self, error::{Error as ApiError, ApiResult}, random::random_ascii};
+use crate::util::{self, error::{Error as ApiError, Res}, random::random_ascii};
 use crate::db::{self, schema::*};
 use crate::model::{User};
-use diesel::{self, prelude::*, dsl::*};
+use diesel::{self, prelude::*};
 use rocket::{http::{Cookie, Cookies}};
 
 const SESSION_TOKEN_KEY: &'static str = "__session_token";
@@ -26,8 +26,6 @@ pub enum SessionError {
     },
 }
 
-// {{{ Types
-
 #[derive(Insertable)]
 #[table_name="sessions"]
 pub struct SessionInsert {
@@ -35,82 +33,30 @@ pub struct SessionInsert {
     pub token: String,
 }
 
-type AllColumns = (
-    sessions::id,
-    sessions::user_id,
-    sessions::token,
-);
-
-const ALL_COLUMNS : AllColumns = (
-    sessions::id,
-    sessions::user_id,
-    sessions::token,
-);
-
-type All = Select<sessions::table, AllColumns>;
-type WithId = Eq<sessions::id, i32>;
-type WithIds<'a> = EqAny<sessions::id, &'a Vec<i32>>;
-type WithUser = Eq<sessions::user_id, i32>;
-type WithUsers<'a> = EqAny<sessions::user_id, &'a Vec<i32>>;
-type WithToken<'a> = Eq<sessions::token, &'a str>;
-type WithTokens<'a> = EqAny<sessions::token, &'a Vec<&'a str>>;
-
-// }}}
-
 impl Session {
 
-    // {{{ Data Access
-
-    pub fn insert_one(values: &SessionInsert, c: &db::Connection) -> ApiResult<Self>
+    pub fn insert_one(values: &SessionInsert, c: &db::Connection) -> Res<Self>
     {
-        diesel::insert_into(Self::table())
+        diesel::insert_into(sessions::table)
             .values(values)
             .execute(&**c)?;
 
-        Ok(Self::table().filter(
+        Ok(sessions::table.filter(
             util::sql::with_rowid(util::sql::last_insert_rowid(c)))
                 .first(&**c)?
         )
     }
 
-    pub fn delete(token: &str, c: &db::Connection) -> ApiResult<usize>
+    pub fn delete(token: &str, c: &db::Connection) -> Res<usize>
     {
         let result =
             diesel::delete(
-                Self::table().filter(Self::with_token(token))
+                sessions::table.filter(sessions::token.eq(token))
             ).execute(&**c)?;
         Ok(result)
     }
 
-    pub fn table() -> sessions::table
-    { sessions::table }
-
-    pub fn all() -> All
-    { Self::table().select(ALL_COLUMNS) }
-
-    pub fn with_id(id: i32) -> WithId
-    { sessions::id.eq(id) }
-
-    pub fn with_ids(ids: &Vec<i32>) -> WithIds
-    { sessions::id.eq_any(ids) }
-
-    pub fn with_user(user_id: i32) -> WithUser
-    { sessions::user_id.eq(user_id) }
-
-    pub fn with_users(user_ids: &Vec<i32>) -> WithUsers
-    { sessions::user_id.eq_any(user_ids) }
-
-    pub fn with_token(token: &str) -> WithToken
-    { sessions::token.eq(token) }
-
-    pub fn with_tokens<'a>(tokens: &'a Vec<&'a str>) -> WithTokens
-    { sessions::token.eq_any(tokens) }
-
-    // }}}
-    // {{{ Cookie Access
-
-    pub fn set_cookie(&self, cookies: &mut Cookies)
-    {
+    pub fn set_cookie(&self, cookies: &mut Cookies) {
         use base64::encode;
         let cookie =
             Cookie::build(SESSION_TOKEN_KEY, encode(&self.token))
@@ -120,13 +66,11 @@ impl Session {
         cookies.add(cookie);
     }
 
-    pub fn del_cookie(cookies: &mut Cookies)
-    {
+    pub fn del_cookie(cookies: &mut Cookies) {
         cookies.remove(Cookie::named(SESSION_TOKEN_KEY));
     }
 
-    pub fn get_cookie(cookies: &Cookies) -> ApiResult<Option<String>>
-    {
+    pub fn get_cookie(cookies: &Cookies) -> Res<Option<String>> {
         use base64::decode;
         match cookies.get(SESSION_TOKEN_KEY) {
             Some(token) => Ok(Some(String::from_utf8(decode(token.value())?)?)),
@@ -134,14 +78,13 @@ impl Session {
         }
     }
 
-    pub fn from_cookie(cookies: &mut Cookies, c: &db::Connection) -> ApiResult<Option<Self>>
-    {
+    pub fn from_cookie(cookies: &mut Cookies, c: &db::Connection) -> Res<Option<Self>> {
         match Self::get_cookie(cookies) {
             Ok(token)  => {
                 match token {
                     Some(value) => {
                         println!("[session {}] cookie found", value);
-                        let result = Self::table().filter(Self::with_token(&value)).first::<Session>(&**c)?;
+                        let result = sessions::table.filter(sessions::token.eq(&value)).first::<Session>(&**c)?;
                         Ok(Some(result))
                     },
                     None => {
@@ -159,25 +102,16 @@ impl Session {
         }
     }
 
-    // }}}
-    // {{{ Utility
-
-    pub fn is_duplicate(token: &str, c: &db::Connection) -> ApiResult<bool>
-    {
-        let count = Self::table().select(diesel::dsl::count(Self::with_token(token))).execute(&**c)?;
+    pub fn is_duplicate(token: &str, c: &db::Connection) -> Res<bool> {
+        let count = sessions::table.select(diesel::dsl::count(sessions::token.eq(token))).execute(&**c)?;
         return Ok(count > 1)
     }
 
-    pub fn token() -> String
-    {
+    pub fn token() -> String {
         random_ascii(SESSION_TOKEN_LEN)
     }
 
-    // }}}
-    // {{{ API
-
-    pub fn create(user_id: i32, c: &db::Connection, cookies: &mut Cookies) -> ApiResult<Session>
-    {
+    pub fn create(user_id: i32, c: &db::Connection, cookies: &mut Cookies) -> Res<Session> {
         c.transaction::<_, ApiError, _>(|| {
 
             println!("[uid {}] creating session", user_id);
@@ -201,15 +135,14 @@ impl Session {
         })
     }
 
-    pub fn login(user_id: i32, c: &db::Connection, cookies: &mut Cookies) -> ApiResult<Session>
-    {
+    pub fn login(user_id: i32, c: &db::Connection, cookies: &mut Cookies) -> Res<Session> {
         use diesel::result::Error::NotFound;
 
         c.transaction::<_, ApiError, _>(|| {
 
             /* Find the stored session. */
-            let query = Self::table()
-                .filter(Self::with_user(user_id))
+            let query = sessions::table
+                .filter(sessions::user_id.eq(user_id))
                 .first::<Session>(&**c);
 
             match query {
@@ -234,8 +167,7 @@ impl Session {
         })
     }
 
-    pub fn logout(c: &db::Connection, cookies: &mut Cookies) -> ApiResult<usize>
-    {
+    pub fn logout(c: &db::Connection, cookies: &mut Cookies) -> Res<usize> {
         use crate::util::error::ServerError;
 
         let result = match Self::get_cookie(cookies) {
@@ -266,9 +198,8 @@ impl Session {
                 Err(error)
             },
         };
+
         Self::del_cookie(cookies);
         result
     }
-
-    // }}}
 }

@@ -1,6 +1,6 @@
 use crate::db;
 use crate::model::{User, File, FileInsert};
-use crate::util::{error::{Error as ApiError, ApiResult}, random::random_ascii, upload::FileUpload, download::FileDownload};
+use crate::util::{error::{Error as E, Res}, random::random_ascii, upload::FileUpload, download::FileDownload};
 
 use rocket::{http::Status, response::{status, NamedFile}};
 use rocket_contrib::json::{JsonValue};
@@ -38,7 +38,7 @@ pub enum FileError {
 // {{{ Upload
 
 #[post("/", data = "<data>", format = "multipart/form-data")]
-pub fn upload_http(u: User, data: FileUpload, c: db::Connection) -> ApiResult<status::Created<JsonValue>>
+pub fn upload_http(u: User, data: FileUpload, c: db::Connection) -> Res<status::Created<JsonValue>>
 {
     use std::fs;
     use crate::util::date::UtcDateTime;
@@ -103,9 +103,9 @@ pub fn upload_forbidden(_data: FileUpload) -> Status
 // {{{ Lookup
 
 #[get("/<key>")]
-pub fn lookup(key: String, c: db::Connection) -> ApiResult<FileDownload>
+pub fn lookup(key: String, c: db::Connection) -> Res<FileDownload>
 {
-    c.transaction::<_, ApiError, _>(|| {
+    c.transaction::<_, E, _>(|| {
         let mut file = File::by_key(&key, &c)?;
         match NamedFile::open(user_store_file(file.user_id, &file.key)) {
             Ok(named_file) => {
@@ -125,7 +125,7 @@ pub fn lookup(key: String, c: db::Connection) -> ApiResult<FileDownload>
 // {{{ Delete
 
 #[delete("/<key>")]
-pub fn delete(u: User, key: String, c: db::Connection) -> ApiResult<JsonValue>
+pub fn delete(u: User, key: String, c: db::Connection) -> Res<JsonValue>
 {
     let file = File::by_key(&key, &c)?;
 
@@ -149,7 +149,7 @@ pub fn delete(u: User, key: String, c: db::Connection) -> ApiResult<JsonValue>
 // {{{ Query
 
 #[get("/")]
-pub fn query(u: User, c: db::Connection) -> ApiResult<JsonValue>
+pub fn query(u: User, c: db::Connection) -> Res<JsonValue>
 {
     let files = File::table().filter(File::with_user(u.id)).get_results::<File>(&*c)?;
     Ok(JsonValue(serde_json::to_value(&files)?))

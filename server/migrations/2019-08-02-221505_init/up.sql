@@ -5,12 +5,12 @@ CREATE TABLE users (
 
 CREATE TABLE sessions (
     id              INTEGER NOT NULL PRIMARY KEY,
-    user_id         INTEGER NOT NULL REFERENCES users(id),
+    user_id         INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     token           TEXT NOT NULL
 );
 
 CREATE TABLE passwords (
-    user_id         INTEGER NOT NULL PRIMARY KEY REFERENCES users(id),
+    user_id         INTEGER NOT NULL PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
     hash            BLOB NOT NULL,
     salt            TEXT NOT NULL
 );
