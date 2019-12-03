@@ -7,7 +7,18 @@
 ![Screengrab of the ui screen][Ui]
 
 ##### Installation
-In order to build the project, you need to install make, rsync, cargo, a recent nightly toolchain, and the compass CSS framework. Then run the commands below.
+In order to build the project, you need to install:
+* make
+* rsync
+* cargo & rustup with a recent nightly toolchain
+* compass
+* diesel-cli
+
+It is recommended to install *diesel-cli* via cargo:
+```sh
+cargo install diesel_cli --force --no-default-features --features sqlite
+```
+When all build-dependencies are installed, run:
 ```sh
 $ git clone https://github.com/4nickel/flink
 $ cd flink
