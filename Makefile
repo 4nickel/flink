@@ -28,6 +28,6 @@ clean:
 	@$(MAKE) -C $(SERVER) clean
 	@$(MAKE) -C $(CLIENT) clean
 
-.PHONY: launch
-launch:
-	@$(MAKE) -C $(SERVER) launch
+.PHONY: service
+service:
+	@$(MAKE) -C $(SERVER) service

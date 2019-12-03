@@ -5,22 +5,32 @@
 #
 
 VAR=var
+ENVRC="./.envrc"
 
-all: build
+all: assets db release
 
 .PHONY: assets
 assets:
 	@(ln -s ../$(ASSETS) $(ASSETS) 2>/dev/null || :)
-	@(mkdir $(VAR)/spool 2>/dev/null || :)
-	@(mkdir $(VAR)/store 2>/dev/null || :)
+	@(mkdir -p $(VAR)/spool 2>/dev/null || :)
+	@(mkdir -p $(VAR)/store 2>/dev/null || :)
 
-.PHONY: launch
-launch:
-	source ./.envrc && cargo run
+.PHONY: db
+db:
+	source $(ENVRC) && diesel migration run
 
-.PHONY: build
-build:
-	source ./.envrc && cargo build
+.PHONY: service
+service: assets db release
+	source $(ENVRC) && cargo run --release -- run
+
+.PHONY: release
+release:
+	source $(ENVRC) && cargo build --release
+
+.PHONY: purge
+purge:
+	rm -rf $(VAR)/spool
+	rm -rf $(VAR)/store
 
 .PHONY: clean
 clean:
