@@ -22,6 +22,6 @@ CREATE TABLE files (
     val             TEXT NOT NULL,
     upload_date     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     delete_date     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    downloads       INTEGER NOT NULL,
+    downloads       INTEGER NOT NULL DEFAULT 0,
     bytes           INTEGER NOT NULL
 );
