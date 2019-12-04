@@ -18,6 +18,8 @@ assets:
 .PHONY: db
 db:
 	source $(ENVRC) && diesel migration run
+	sed -i src/db/schema.rs -e "10s/.*/        bytes -> BigInt,/"
+	cargo fmt -- src/db/schema.rs
 
 .PHONY: service
 service: assets db release
