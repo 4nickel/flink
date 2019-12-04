@@ -38,9 +38,4 @@ joinable!(files -> users (user_id));
 joinable!(passwords -> users (user_id));
 joinable!(sessions -> users (user_id));
 
-allow_tables_to_appear_in_same_query!(
-    files,
-    passwords,
-    sessions,
-    users,
-);
+allow_tables_to_appear_in_same_query!(files, passwords, sessions, users,);

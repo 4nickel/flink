@@ -1,5 +1,5 @@
-pub mod authentication;
 pub mod app;
+pub mod authentication;
 pub use app::*;
 
 pub const API_PROT: &'static str = "https";

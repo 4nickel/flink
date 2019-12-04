@@ -1,12 +1,12 @@
-use crate::util::{self, error::Res};
 use crate::db::{self, schema::*};
-use crate::model::{User};
-use diesel::{self, SaveChangesDsl, prelude::*, dsl::*};
+use crate::model::User;
+use crate::util::{self, error::Res};
 use chrono::prelude::*;
+use diesel::{self, dsl::*, prelude::*, SaveChangesDsl};
 
 #[derive(Identifiable, AsChangeset, Queryable, Associations, Serialize, PartialEq, Debug)]
 #[belongs_to(User)]
-#[table_name="files"]
+#[table_name = "files"]
 pub struct File {
     pub id: i32,
     pub user_id: i32,
@@ -19,7 +19,7 @@ pub struct File {
 }
 
 #[derive(Insertable)]
-#[table_name="files"]
+#[table_name = "files"]
 pub struct FileInsert {
     pub user_id: i32,
     pub key: String,
@@ -31,7 +31,6 @@ pub struct FileInsert {
 }
 
 impl File {
-
     pub fn by_id(id: i32, c: &db::Connection) -> Res<Self> {
         Ok(files::table.filter(files::id.eq(id)).first(&**c)?)
     }
@@ -45,9 +44,9 @@ impl File {
             .values(values)
             .execute(&**c)?;
 
-        Ok(files::table.filter(
-            util::sql::with_rowid(util::sql::last_insert_rowid(c))).first(&**c)?
-        )
+        Ok(files::table
+            .filter(util::sql::with_rowid(util::sql::last_insert_rowid(c)))
+            .first(&**c)?)
     }
 
     pub fn create(values: &FileInsert, c: &db::Connection) -> Res<File> {
@@ -64,7 +63,9 @@ impl File {
     }
 
     pub fn is_duplicate(key: &str, c: &db::Connection) -> Res<bool> {
-        let count = files::table.select(diesel::dsl::count(files::key.eq(key))).execute(&**c)?;
+        let count = files::table
+            .select(diesel::dsl::count(files::key.eq(key)))
+            .execute(&**c)?;
         return Ok(count > 1);
     }
 
@@ -79,7 +80,7 @@ impl File {
     }
 }
 
-use core::fmt::{Display, Formatter, Error as FmtError};
+use core::fmt::{Display, Error as FmtError, Formatter};
 impl Display for File {
     fn fmt(&self, f: &mut Formatter) -> Result<(), FmtError> {
         write!(f, "File[{}] @{} {}", self.id, self.key, self.val)

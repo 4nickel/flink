@@ -1,8 +1,8 @@
 use crate::db::{self, schema::*};
-use crate::model::{User};
+use crate::model::User;
 use crate::util::{self, error::Res, random::random_ascii};
+use argon2rs::argon2i_simple;
 use diesel::{self, prelude::*};
-use argon2rs::{argon2i_simple};
 
 const SALT_LEN: usize = 16;
 const PEANUTS: &'static str = "peanut-butter-jelly-time!";
@@ -10,7 +10,7 @@ const PEANUTS: &'static str = "peanut-butter-jelly-time!";
 #[derive(Identifiable, Insertable, Queryable, Associations, Serialize, PartialEq, Debug)]
 #[primary_key(user_id)]
 #[belongs_to(User)]
-#[table_name="passwords"]
+#[table_name = "passwords"]
 pub struct Password {
     pub user_id: i32,
     pub hash: Vec<u8>,
@@ -18,14 +18,13 @@ pub struct Password {
 }
 
 impl Password {
-
     pub fn insert_one(values: &Password, c: &db::Connection) -> Res<Self> {
         diesel::insert_into(passwords::table)
             .values(values)
             .execute(&**c)?;
-        Ok(passwords::table.filter(
-            util::sql::with_rowid(util::sql::last_insert_rowid(c))).first(&**c)?
-        )
+        Ok(passwords::table
+            .filter(util::sql::with_rowid(util::sql::last_insert_rowid(c)))
+            .first(&**c)?)
     }
 
     pub fn salt() -> String {

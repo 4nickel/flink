@@ -1,9 +1,12 @@
-use crate::util::error::{failure, Error as ApiError};
 use crate::model::User;
+use crate::util::error::{failure, Error as ApiError};
 use crate::util::multipart::MultipartForm;
 
+use rocket::{
+    data::{self, FromDataSimple},
+    Data, Outcome, Request,
+};
 use std::path::PathBuf;
-use rocket::{Request, Data, Outcome, data::{self, FromDataSimple}};
 
 use crate::api::app::files::user_spool;
 
@@ -23,25 +26,29 @@ impl FromDataSimple for FileUpload {
 
         let user = match request.guard::<User>() {
             Outcome::Success(value) => value,
-            _ => return failure(ServerError::DataGuardError { name: String::from("User") })
+            _ => {
+                return failure(ServerError::DataGuardError {
+                    name: String::from("User"),
+                })
+            }
         };
 
         let form = match MultipartForm::from_request(request, data, &user_spool(user.id)) {
             Ok(success) => success,
-            Err(error) => return failure(error)
+            Err(error) => return failure(error),
         };
 
         let meta = match form.get_text("meta") {
             Ok(success) => success,
-            Err(error) => return failure(error)
+            Err(error) => return failure(error),
         };
         let name = match form.get_text("name") {
             Ok(success) => success,
-            Err(error) => return failure(error)
+            Err(error) => return failure(error),
         };
         let (file, size) = match form.get_file("file") {
             Ok(success) => success,
-            Err(error) => return failure(error)
+            Err(error) => return failure(error),
         };
 
         let upload = FileUpload {
