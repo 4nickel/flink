@@ -2,7 +2,7 @@ use crate::db::{self, schema::*};
 use crate::model::User;
 use crate::util::{self, error::Res};
 use chrono::prelude::*;
-use diesel::{self, dsl::*, prelude::*, SaveChangesDsl};
+use diesel::{self, prelude::*, SaveChangesDsl};
 
 #[derive(Identifiable, AsChangeset, Queryable, Associations, Serialize, PartialEq, Debug)]
 #[belongs_to(User)]

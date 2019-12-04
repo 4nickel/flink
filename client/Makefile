@@ -1,8 +1,4 @@
 # vim: set ft=make:
-#
-# Author: Felix Viernickel
-#   Date: 2019
-#
 
 COPY=rsync -avzh
 SYNC=rsync -avzh --delete

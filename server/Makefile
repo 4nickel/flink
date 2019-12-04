@@ -1,8 +1,4 @@
 # vim: set ft=make:
-#
-# Author: Felix Viernickel
-#   Date: 2019
-#
 
 VAR=var
 ENVRC="./.envrc"
@@ -15,11 +11,15 @@ assets:
 	@(mkdir -p $(VAR)/spool 2>/dev/null || :)
 	@(mkdir -p $(VAR)/store 2>/dev/null || :)
 
+.PHONY: schema-patch:
+schema-patch:
+	sed -i src/db/schema.rs -e "10s/.*/        bytes -> BigInt,/"
+	cargo fmt -- src/db/schema.rs
+
 .PHONY: db
 db:
 	source $(ENVRC) && diesel migration run
-	sed -i src/db/schema.rs -e "10s/.*/        bytes -> BigInt,/"
-	cargo fmt -- src/db/schema.rs
+	$(MAKE) schema-patch
 
 .PHONY: service
 service: assets db release
@@ -31,6 +31,7 @@ release:
 
 .PHONY: purge
 purge:
+	$(MAKE) clean
 	rm -rf $(VAR)/spool
 	rm -rf $(VAR)/store
 
