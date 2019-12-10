@@ -19,7 +19,7 @@ jobs:
       uses: hecrj/setup-rust-action@v1
       with:
         rust-version: ${{ matrix.rust }}
-        components: [rustfmt]
+        components: rustfmt
 
     - name: Set up sqlite
       run: sudo apt-get install sqlite3 libsqlite3-dev
