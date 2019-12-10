@@ -1,6 +1,6 @@
 # vim: set ft=make:
 
-VAR=var
+VAR="test"
 ENVRC="./.envrc"
 
 all: assets db release
@@ -11,7 +11,7 @@ assets:
 	@(mkdir -p $(VAR)/spool 2>/dev/null || :)
 	@(mkdir -p $(VAR)/store 2>/dev/null || :)
 
-.PHONY: schema-patch:
+.PHONY: schema-patch
 schema-patch:
 	sed -i src/db/schema.rs -e "10s/.*/        bytes -> BigInt,/"
 	cargo fmt -- src/db/schema.rs
@@ -24,6 +24,10 @@ db:
 .PHONY: service
 service: assets db release
 	source $(ENVRC) && cargo run --release -- run
+
+.PHONY: debug
+debug:
+	source $(ENVRC) && cargo build --debug
 
 .PHONY: release
 release:

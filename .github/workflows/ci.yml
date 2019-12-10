@@ -1,0 +1,36 @@
+name: CI
+
+on: [push]
+
+jobs:
+
+  test:
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        rust: [nightly]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+
+    - name: Set up rust
+      uses: hecrj/setup-rust-action@v1
+      with:
+        rust-version: ${{ matrix.rust }}
+
+    - name: Set up sqlite
+      run: sudo apt-get install sqlite3 libsqlite3-dev
+
+    - name: Set up diesel
+      run: cargo install diesel_cli --force --no-default-features --features sqlite
+
+    - name: Checkout
+      uses: actions/checkout@master
+
+    - name: Build in release mode
+      env:
+        DATABASE_URL: "test/db.sqlite"
+        FLINK_DIR: "test"
+      run: make server

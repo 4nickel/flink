@@ -2,6 +2,8 @@
 /bin
 /assets/*
 !/assets/.gitkeep
+/server/local
 /server/target
-/server/var
+/server/test/*
+!/server/test/.gitkeep
 /client/.sass-cache

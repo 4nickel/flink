@@ -16,17 +16,21 @@ use rocket::{
 use rocket_contrib::json::JsonValue;
 use std::path::{Path, PathBuf};
 
-const VAR_DIR: &'static str = "var";
+const FLINK_DIR: &'static str = env!("FLINK_DIR");
 const STORE_DIR: &'static str = "store";
 const SPOOL_DIR: &'static str = "spool";
 const FILE_KEY_LEN: usize = 32;
 
 pub fn user_store(user_id: i32) -> PathBuf {
-    Path::new(VAR_DIR).join(STORE_DIR).join(user_id.to_string())
+    Path::new(FLINK_DIR)
+        .join(STORE_DIR)
+        .join(user_id.to_string())
 }
 
 pub fn user_spool(user_id: i32) -> PathBuf {
-    Path::new(VAR_DIR).join(SPOOL_DIR).join(user_id.to_string())
+    Path::new(FLINK_DIR)
+        .join(SPOOL_DIR)
+        .join(user_id.to_string())
 }
 
 pub fn user_store_file(user_id: i32, key: &str) -> PathBuf {
@@ -52,9 +56,9 @@ pub fn upload_http(
     use crate::util::date::UtcDateTime;
     use std::fs;
 
-    assert!(Path::new(VAR_DIR).is_dir());
-    assert!(Path::new(VAR_DIR).join(STORE_DIR).is_dir());
-    assert!(Path::new(VAR_DIR).join(SPOOL_DIR).is_dir());
+    assert!(Path::new(FLINK_DIR).is_dir());
+    assert!(Path::new(FLINK_DIR).join(STORE_DIR).is_dir());
+    assert!(Path::new(FLINK_DIR).join(SPOOL_DIR).is_dir());
 
     let key = random_ascii(FILE_KEY_LEN);
 
